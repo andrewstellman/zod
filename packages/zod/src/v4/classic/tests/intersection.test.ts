@@ -135,6 +135,17 @@ test("deep intersection of arrays", async () => {
   expect(asyncCat.posts).toEqual(posts);
 });
 
+test("identical NaN merges", () => {
+  expect(z.nan().and(z.nan()).safeParse(Number.NaN)).toEqual({ success: true, data: Number.NaN });
+  expect(z.unknown().and(z.unknown()).safeParse(Number.NaN)).toEqual({ success: true, data: Number.NaN });
+
+  const loose = z.looseObject({ a: z.string() }).and(z.looseObject({ b: z.string() }));
+  expect(loose.safeParse({ a: "x", b: "y", c: Number.NaN })).toEqual({
+    success: true,
+    data: { a: "x", b: "y", c: Number.NaN },
+  });
+});
+
 test("invalid intersection types", async () => {
   const numberIntersection = z.intersection(
     z.number(),
