@@ -219,6 +219,20 @@ test("re-registering same id silently overwrites", () => {
   expect(reg._idmap.get("shared-id")).toBe(b);
 });
 
+test("removing the overwritten schema keeps the id for its current owner", () => {
+  const reg = z.registry<z.core.GlobalMeta>();
+  const a = z.string();
+  const b = z.number();
+
+  reg.add(a, { id: "shared-id" });
+  reg.add(b, { id: "shared-id" });
+  reg.remove(a);
+
+  expect(reg.has(b)).toBe(true);
+  expect(reg._idmap.get("shared-id")).toBe(b);
+  expect(z.toJSONSchema(reg).schemas).toMatchObject({ "shared-id": { type: "number" } });
+});
+
 test("toJSONSchema throws on duplicate id across different schemas", () => {
   const reg = z.registry<z.core.GlobalMeta>();
   const a = z.string().register(reg, { id: "duplicate-id" });
